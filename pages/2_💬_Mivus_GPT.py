@@ -3,6 +3,10 @@ import os
 from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
 
+#Inserir logo ao lado
+logo = "caminho_para_sua_logo.png" 
+st.sidebar.image(logo, use_column_width=True)
+
 # Configuração da API
 api_key = st.secrets["GROQ_API_KEY"] 
 os.environ['GROQ_API_KEY'] = api_key
