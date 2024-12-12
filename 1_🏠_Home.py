@@ -7,7 +7,7 @@ st.set_page_config(
 
 
 logo = "caminho_para_sua_logo.png" 
-st.image(image, caption="Minha imagem", use_container_width=True)
+st.sidebar.image(logo, use_container_width=True)  # Atualizado para o parâmetro correto
 st.sidebar.write("Feito por: [Mivus Academy](https://www.mivus.com.br)")
 
 st.title("Olá, Querido Lendário 😀")
