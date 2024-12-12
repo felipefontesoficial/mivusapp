@@ -7,6 +7,10 @@ st.set_page_config(
     page_title="App Mivus"
 )
 
+#Inserir logo ao lado
+logo = "caminho_para_sua_logo.png" 
+st.sidebar.image(logo, use_container_width=True)  # Atualizado para o parâmetro correto
+
 def mostrar_consulta_cnpj_dominio():
     st.title("Consultor de CNPJ e Domínio")
 
