@@ -5,7 +5,7 @@ from langchain.prompts import ChatPromptTemplate
 
 #Inserir logo ao lado
 logo = "caminho_para_sua_logo.png" 
-st.sidebar.image(logo, use_column_width=True)
+st.sidebar.image(logo, use_container_width=True)  # Atualizado para o parâmetro correto
 
 # Configuração da API
 api_key = st.secrets["GROQ_API_KEY"] 
