@@ -7,15 +7,15 @@ st.set_page_config(
     page_title="App Mivus"
 )
 
-#Inserir logo ao lado
+# Inserir logo ao lado
 logo = "caminho_para_sua_logo.png" 
-st.sidebar.image(logo, use_container_width=True)  # Atualizado para o parâmetro correto
+st.sidebar.image(logo, use_column_width=True)
 
 def mostrar_consulta_cnpj_dominio():
     st.title("Consultor de CNPJ e Domínio")
 
     col1, col2 = st.columns(2)
-    
+
     # Inserir CNPJ
     col1.subheader("Consultar CNPJ")
     cnpj_input = col1.text_input("Digite o CNPJ:", "").replace(".", "").replace("-", "").replace("/", "").replace(" ", "")
@@ -34,16 +34,13 @@ def mostrar_consulta_cnpj_dominio():
         else:
             col2.warning("Por favor, digite um domínio válido.")
 
-    st.markdown("---") 
+    st.markdown("---")
 
-
-
-
-#Função de Consultar CNPJ
+# Função de Consultar CNPJ
 def consulta_cnpj(cnpj):
     url = f"https://www.receitaws.com.br/v1/cnpj/{cnpj}"
-    querystring = {"token": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXX", "cnpj": "06990590000123", "plugin": "RF"} # coloque sua token válida aqui!
-    response = requests.request("GET", url, params=querystring)
+    querystring = {"token": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXX"}  # coloque sua token válida aqui!
+    response = requests.get(url, params=querystring)
 
     if response.status_code == 200:
         resp = json.loads(response.text)
@@ -54,9 +51,9 @@ def consulta_cnpj(cnpj):
         porte = resp.get('porte', 'Não disponível')
         complemento = resp.get('complemento', '')
         data_situacao = resp.get('data_situacao', 'Não disponível')
-        numero_socios = len(resp.get('qsa', []))  
+        numero_socios = len(resp.get('qsa', []))
 
-        st.markdown("---") 
+        st.markdown("---")
 
         st.header(f"Informações da Empresa - CNPJ: {resp.get('cnpj', 'Não encontrado')}")
 
@@ -66,7 +63,7 @@ def consulta_cnpj(cnpj):
         st.write(f"Data de Abertura: {data_abertura}")
         st.write(f"Situação: {situacao}")
         st.write(f"Porte: {porte}")
-        
+
         st.subheader("Endereço:")
         st.write(f"{resp.get('logradouro', '')}, {resp.get('numero', '')} {complemento} - {resp.get('bairro', '')} - {resp.get('municipio', '')} ({resp.get('uf', '')}) - CEP: {resp.get('cep', '')}")
 
@@ -77,7 +74,6 @@ def consulta_cnpj(cnpj):
         st.write(f"Data da Situação: {data_situacao}")
         st.write(f"Número de Sócios: {numero_socios}")
 
-        # Encontrar e exibir o administrador
         st.subheader("Administrador:")
         administrador = None
         for socio in resp.get('qsa', []):
@@ -102,7 +98,7 @@ def consulta_cnpj(cnpj):
     else:
         st.error("Ocorreu um erro ao consultar o CNPJ. Verifique o CNPJ e tente novamente.")
 
-#Função de Consultar Domínio
+# Função de Consultar Domínio
 def consultar_rdap(dominio):
     url = f"https://rdap.registro.br/domain/{dominio}"
     resposta = requests.get(url)
@@ -110,41 +106,37 @@ def consultar_rdap(dominio):
         dados = resposta.json()
 
         # Extraindo os dados desejados
-        nome_dominio = dados['handle']
-        status = dados['status'][0]
+        nome_dominio = dados.get('handle', 'Não informado')
+        status = dados.get('status', ['Não informado'])[0]
 
-        # Percorrendo as entidades para encontrar o registrante
-        for entidade in dados['entities']:
+        razao_social = 'Não informado'
+        handle_registrante = 'Não informado'
+        representante_legal = 'Não informado'
+        cnpj_cpf = 'Não informado'
+
+        for entidade in dados.get('entities', []):
             if 'roles' in entidade and 'registrant' in entidade['roles']:
-                razao_social = entidade['vcardArray'][1][2][2]
-                handle_registrante = entidade['handle']
+                vcard = entidade.get('vcardArray', [[], []])
+                if len(vcard[1]) > 2:
+                    razao_social = vcard[1][2][2]
+                handle_registrante = entidade.get('handle', 'Não informado')
                 representante_legal = entidade.get('legalRepresentative', 'Não informado')
-                
-                # Verificando se o CNPJ/CPF está presente
-                cnpj_cpf = 'Não informado'
-                if 'publicIds' in entidade:
-                    for public_id in entidade['publicIds']:
-                        if public_id['type'] in ('cnpj', 'cpf'):
-                            cnpj_cpf = public_id['identifier']
+
+                for public_id in entidade.get('publicIds', []):
+                    if public_id['type'] in ('cnpj', 'cpf'):
+                        cnpj_cpf = public_id['identifier']
                 break
-        
-        # Exibindo os dados utilizando elementos do Streamlit
-        st.markdown("---") 
+
+        st.markdown("---")
         st.header(f"Informações do domínio {dominio}:")
         st.markdown(f"**Nome do Domínio:** {nome_dominio}")
         st.markdown(f"**Status:** {status}")
         st.markdown(f"**Razão Social:** {razao_social}")
         st.markdown(f"**CNPJ/CPF:** {cnpj_cpf}")
-        st.markdown(f"**Handle do Registrante** {handle_registrante}")
+        st.markdown(f"**Handle do Registrante:** {handle_registrante}")
         st.markdown(f"**Representante Legal:** {representante_legal}")
 
     else:
         st.error(f"Erro ao consultar o domínio: {resposta.status_code}")
 
-
-
 mostrar_consulta_cnpj_dominio()
-
-
-
-
