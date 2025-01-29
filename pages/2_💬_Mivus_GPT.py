@@ -11,7 +11,7 @@ st.sidebar.image(logo, use_container_width=True)  # Atualizado para o parâmetro
 api_key = st.secrets["GROQ_API_KEY"] 
 os.environ['GROQ_API_KEY'] = api_key
 
-chat = ChatGroq(model='llama-3.1-70b-versatile')
+chat = ChatGroq(model='llama-3.3-70b-versatile')
 
 # Função para obter a resposta do bot
 def resposta_do_bot(lista_mensagens):
