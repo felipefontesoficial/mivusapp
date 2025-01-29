@@ -9,7 +9,7 @@ st.set_page_config(
 
 # Inserir logo ao lado
 logo = "caminho_para_sua_logo.png" 
-st.sidebar.image(logo, use_column_width=True)
+st.sidebar.image(logo, use_container_width=True)
 
 def mostrar_consulta_cnpj_dominio():
     st.title("Consultor de CNPJ e Domínio")
@@ -114,18 +114,14 @@ def consultar_rdap(dominio):
         representante_legal = 'Não informado'
         cnpj_cpf = 'Não informado'
 
-        for entidade in dados.get('entities', []):
-            if 'roles' in entidade and 'registrant' in entidade['roles']:
-                vcard = entidade.get('vcardArray', [[], []])
-                if len(vcard[1]) > 2:
-                    razao_social = vcard[1][2][2]
-                handle_registrante = entidade.get('handle', 'Não informado')
-                representante_legal = entidade.get('legalRepresentative', 'Não informado')
+        contatos = []
 
-                for public_id in entidade.get('publicIds', []):
-                    if public_id['type'] in ('cnpj', 'cpf'):
-                        cnpj_cpf = public_id['identifier']
-                break
+        for entidade in dados.get('entities', []):
+            if 'roles' in entidade:
+                vcard = entidade.get('vcardArray', [[], []])
+                nome_contato = next((item[3] for item in vcard[1] if item[0] == 'fn'), 'Não informado')
+                email_contato = next((item[3] for item in vcard[1] if item[0] == 'email'), 'Não informado')
+                contatos.append((nome_contato, email_contato))
 
         st.markdown("---")
         st.header(f"Informações do domínio {dominio}:")
@@ -135,6 +131,13 @@ def consultar_rdap(dominio):
         st.markdown(f"**CNPJ/CPF:** {cnpj_cpf}")
         st.markdown(f"**Handle do Registrante:** {handle_registrante}")
         st.markdown(f"**Representante Legal:** {representante_legal}")
+
+        st.subheader("Contatos:")
+        if contatos:
+            for nome, email in contatos:
+                st.write(f"- Nome: {nome}, E-mail: {email}")
+        else:
+            st.write("Nenhum contato encontrado.")
 
     else:
         st.error(f"Erro ao consultar o domínio: {resposta.status_code}")
