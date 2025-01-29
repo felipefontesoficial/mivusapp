@@ -135,7 +135,8 @@ def consultar_rdap(dominio):
         st.subheader("Contatos:")
         if contatos:
             for nome, email in contatos:
-                st.write(f"- Nome: {nome}, E-mail: {email}")
+                st.write(f"- Nome: {nome}")
+                st.write(f"- E-mail: {email}")
         else:
             st.write("Nenhum contato encontrado.")
 
